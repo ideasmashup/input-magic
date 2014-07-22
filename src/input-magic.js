@@ -44,6 +44,45 @@ if (!String.prototype.localeCompare) {
 	};
 }
 
+var $email = null;
+var firstpress = -1, lastpress = +new Date(), typespeed = -1, count = 0;
+var enable_autocomplete = false;
+
+//special post-keypress behaviors
+function after_keypress() {
+
+	// do nothing until user types more stuff
+	//if (lastpress == firstpress) return;
+
+	var pausedelay = +new Date() - lastpress;
+	//console.log('paused for '+ pausedelay);
+
+	if (pausedelay < 500) {
+		// last keypress very close : do nothing
+		// because user is probably still typing stuff...
+
+		// interrupt tasks
+		//$('.reveal.quartz .loader').hide();
+	}
+	else if (pausedelay > 1000) {
+		// last keypress was long ago
+		// check email harder with a server validation request
+
+		// indicate task in progress
+		//$('.reveal.quartz .loader').show();
+
+		// animate avatar
+		state = 'hey';
+		loops = 0;
+	}
+	else {
+		// last keypress moderately close
+		// user not typing but may type again soon...
+	}
+
+	// do some basic autocompletion and checking
+	email_range_autocomplete($email);
+}
 /*
 	Validation state
  */
@@ -389,4 +428,55 @@ function email_subscribe() {
 
 function email_deep_check(str) {
 	// validate and verify on server
+}
+
+function input_magic(name) {
+	$email = $('input[name='+name+']');
+
+	$email.keypress(function(e){
+		var keycode = (e.keyCode ? e.keyCode : e.which);
+		var now = +new Date();
+
+		// typing text
+		if (count++ == 0) {
+			firstpress = now;
+			typespeed = 3000;
+		}
+		else {
+			lastpress = now;
+			typespeed = (typespeed + (now - lastpress)) / 2;
+		}
+
+		// codes ref : http://www.quirksmode.org/js/keys.html
+
+		if (keycode == 13) {
+			// enter pressed : submit value
+			email_subscribe();
+			$email.data('hint', '');
+			enable_autocomplete = false;
+		}
+		else if (keycode < 32) {
+			// non-printable character : clear hint
+			$email.data('hint', '');
+			enable_autocomplete = false;
+		}
+		else if (keycode >= 33 && keycode <= 40) {
+			// arrows keys (home, end, pgup, pgdwn, etc) : clear hint
+			$email.data('hint', '');
+			enable_autocomplete = true;
+		}
+		else {
+			// printable characters : typing text so stop checking
+			enable_autocomplete = true;
+			$('.reveal.quartz .loader').hide();
+		}
+	});
+
+	var autocomplete_loop = setInterval(function(){
+		if (enable_autocomplete) {
+			after_keypress();
+			enable_autocomplete = false;
+		}
+	}, 200);
+
 }
