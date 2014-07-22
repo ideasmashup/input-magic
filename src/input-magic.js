@@ -44,7 +44,7 @@ if (!String.prototype.localeCompare) {
 	};
 }
 
-var $email = null;
+var $input = null;
 var firstpress = -1, lastpress = +new Date(), typespeed = -1, count = 0;
 var enable_autocomplete = false;
 
@@ -81,7 +81,7 @@ function after_keypress() {
 	}
 
 	// do some basic autocompletion and checking
-	email_range_autocomplete($email);
+	email_range_autocomplete($input);
 }
 /*
 	Validation state
@@ -220,7 +220,7 @@ function email_range_autocomplete($input) {
 	var hint = '';
 	var completeness = Math.min(text.length / 14, 1);
 
-	console.log('mail='+ text +' ( '+ (completeness*100) +'% )');
+	console.log('input='+ text +' ( '+ (completeness*100) +'% )');
 
 	if (text.length < 2) {
 		// no completion yet...
@@ -350,9 +350,9 @@ function email_deep_check(str) {
 }
 
 function input_magic(name) {
-	$email = $('input[name='+name+']');
+	$input = $('input[name='+name+']');
 
-	$email.keypress(function(e){
+	$input.keypress(function(e){
 		var keycode = (e.keyCode ? e.keyCode : e.which);
 		var now = +new Date();
 
@@ -372,17 +372,17 @@ function input_magic(name) {
 			// enter pressed : submit value (?)
 			log.console('enter pressed... submit?');
 
-			$email.data('hint', '');
+			$input.data('hint', '');
 			enable_autocomplete = false;
 		}
 		else if (keycode < 32) {
 			// non-printable character : clear hint
-			$email.data('hint', '');
+			$input.data('hint', '');
 			enable_autocomplete = false;
 		}
 		else if (keycode >= 33 && keycode <= 40) {
 			// arrows keys (home, end, pgup, pgdwn, etc) : clear hint
-			$email.data('hint', '');
+			$input.data('hint', '');
 			enable_autocomplete = true;
 		}
 		else {
