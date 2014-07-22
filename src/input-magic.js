@@ -44,6 +44,45 @@ if (!String.prototype.localeCompare) {
 	};
 }
 
+var $email = null;
+var firstpress = -1, lastpress = +new Date(), typespeed = -1, count = 0;
+var enable_autocomplete = false;
+
+//special post-keypress behaviors
+function after_keypress() {
+
+	// do nothing until user types more stuff
+	//if (lastpress == firstpress) return;
+
+	var pausedelay = +new Date() - lastpress;
+	//console.log('paused for '+ pausedelay);
+
+	if (pausedelay < 500) {
+		// last keypress very close : do nothing
+		// because user is probably still typing stuff...
+
+		// interrupt tasks
+		//$('.reveal.quartz .loader').hide();
+	}
+	else if (pausedelay > 1000) {
+		// last keypress was long ago
+		// check email harder with a server validation request
+
+		// indicate task in progress
+		//$('.reveal.quartz .loader').show();
+
+		// animate avatar
+		state = 'hey';
+		loops = 0;
+	}
+	else {
+		// last keypress moderately close
+		// user not typing but may type again soon...
+	}
+
+	// do some basic autocompletion and checking
+	email_range_autocomplete($email);
+}
 /*
 	Validation state
  */
@@ -185,7 +224,6 @@ function email_range_autocomplete($input) {
 
 	if (text.length < 2) {
 		// no completion yet...
-		$('#btsubmit').text('Complete the e-mail to continue!').attr('disabled', 'disabled');
 		state_change('incomplete');
 	}
 
@@ -193,7 +231,6 @@ function email_range_autocomplete($input) {
 	if (text.indexOf('@') == -1) {
 		if (text.length > 0) {
 			hint = complete(text, ADJS, 1, true, '@');
-			$('#btsubmit').text('Who "at" you?').attr('disabled', 'disabled');
 		}
 	}
 	else {
@@ -204,7 +241,6 @@ function email_range_autocomplete($input) {
 
 			if (aft.indexOf('.') == -1) {
 				hint = complete(aft, DOMS, 1, true, '.');
-				$('#btsubmit').text('Where "at" you from?').attr('disabled', 'disabled');
 				state_change('incomplete');
 			}
 			else {
@@ -214,7 +250,6 @@ function email_range_autocomplete($input) {
 
 				if (aft.charAt(aft.length - 1) !== '.') {
 					if (ext.length > 2) {
-						$('#btsubmit').text('Click here to receive your invite!!').removeAttr('disabled').transition('pulse');
 						state_change('complete');
 					}
 					else {
@@ -310,83 +345,58 @@ function is_email(email) {
 	return true;
 }
 
-function email_subscribe() {
-	// submit mail if address is complete and correct
-	$.ajax({
-		url: 'process.php?action=subscribe',
-		type: 'post',
-		data: $('#email').serialize(),
-		success: function(resp) {
-			if (resp.success) {
-				$('#message.quartz').transition('pulse');
+function email_deep_check(str) {
+	// validate and verify on server
+}
 
-				// user now registered !
-				$('#msg_icon').attr('class', 'checkmark icon');
-				$('#msg_text').text("You've been successfully registered... please confirm the email you will receive in your mailbox!");
-				$('#msg_header').text('Congratulations!');
+function input_magic(name) {
+	$email = $('input[name='+name+']');
 
-				state_change('success');
+	$email.keypress(function(e){
+		var keycode = (e.keyCode ? e.keyCode : e.which);
+		var now = +new Date();
 
-				$('.ui.reveal.quartz').removeClass('move');
-				$('#btsubmit').removeAttr('disabled').attr('data-completed', true).text('Click here to visit the blog');
-			}
-			else {
-				$('#message.quartz').transition('shake');
+		// typing text
+		if (count++ == 0) {
+			firstpress = now;
+			typespeed = 3000;
+		}
+		else {
+			lastpress = now;
+			typespeed = (typespeed + (now - lastpress)) / 2;
+		}
 
-				// error
-				if (resp.view == 'already_registered') {
-					$('#msg_icon').attr('class', 'thumbs up outline icon');
-					$('#msg_text').text("You\'ve already registered! Thank you for your support!");
-					$('#msg_header').text('Welcome back!');
+		// codes ref : http://www.quirksmode.org/js/keys.html
 
-					state_change('complete');
+		if (keycode == 13) {
+			// enter pressed : submit value (?)
+			log.console('enter pressed... submit?');
 
-					$('.ui.reveal.quartz').removeClass('move');
-					$('#btsubmit').removeAttr('disabled').attr('data-completed', true).text('Click here to visit the blog');
-				}
-				else if (resp.view == 'registration_failed') {
-					$('#msg_icon').attr('class', 'icon coffee');
-					$('#msg_text').text("You couldn't be registered, grab some coffee and try again later");//"+resp.data+"!");
-
-					switch (resp.data) {
-						default:
-							$('#msg_header').text('Something went wrong');
-							break;
-						case 'frontend_account_error':
-							$('#msg_header').text('Huh hoh, too much traffic');
-							break;
-						case 'backend_account_error':
-							$('#msg_header').text('Timmo\'s done it again!');
-							break;
-						case 'mailinglist_subscribe_error':
-							$('#msg_header').text('A monkey escaped!');
-							break;
-					}
-
-					state_change('error');
-				}
-				else if (resp.view == 'incorrect_mail') {
-					$('#msg_icon').attr('class', 'lab icon');
-					$('#msg_text').text("There must be a typo in your e-mail, because this one doesn't look right!");
-					$('#msg_header').text('Mail hazard detected');
-
-					state_change('error');
-				}
-				else {
-					$('#msg_icon').attr('class', 'icon warning');
-					$('#msg_text').text("You couldn't be registered due to "+resp.data+"!");
-					$('#msg_header').text('Something went wrong');
-
-					state_change('error');
-				}
-			}
+			$email.data('hint', '');
+			enable_autocomplete = false;
+		}
+		else if (keycode < 32) {
+			// non-printable character : clear hint
+			$email.data('hint', '');
+			enable_autocomplete = false;
+		}
+		else if (keycode >= 33 && keycode <= 40) {
+			// arrows keys (home, end, pgup, pgdwn, etc) : clear hint
+			$email.data('hint', '');
+			enable_autocomplete = true;
+		}
+		else {
+			// printable characters : typing text so stop checking
+			enable_autocomplete = true;
+			$('.reveal.quartz .loader').hide();
 		}
 	});
 
-	state = 'hey';
-	statelocked = true;
-}
+	var autocomplete_loop = setInterval(function(){
+		if (enable_autocomplete) {
+			after_keypress();
+			enable_autocomplete = false;
+		}
+	}, 200);
 
-function email_deep_check(str) {
-	// validate and verify on server
 }
