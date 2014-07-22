@@ -345,81 +345,6 @@ function is_email(email) {
 	return true;
 }
 
-function email_subscribe() {
-	// submit mail if address is complete and correct
-	$.ajax({
-		url: 'process.php?action=subscribe',
-		type: 'post',
-		data: $('#email').serialize(),
-		success: function(resp) {
-			if (resp.success) {
-				$('#message.quartz').transition('pulse');
-
-				// user now registered !
-				$('#msg_icon').attr('class', 'checkmark icon');
-				$('#msg_text').text("You've been successfully registered... please confirm the email you will receive in your mailbox!");
-				$('#msg_header').text('Congratulations!');
-
-				state_change('success');
-
-				$('.ui.reveal.quartz').removeClass('move');
-			}
-			else {
-				$('#message.quartz').transition('shake');
-
-				// error
-				if (resp.view == 'already_registered') {
-					$('#msg_icon').attr('class', 'thumbs up outline icon');
-					$('#msg_text').text("You\'ve already registered! Thank you for your support!");
-					$('#msg_header').text('Welcome back!');
-
-					state_change('complete');
-
-					$('.ui.reveal.quartz').removeClass('move');
-				}
-				else if (resp.view == 'registration_failed') {
-					$('#msg_icon').attr('class', 'icon coffee');
-					$('#msg_text').text("You couldn't be registered, grab some coffee and try again later");//"+resp.data+"!");
-
-					switch (resp.data) {
-						default:
-							$('#msg_header').text('Something went wrong');
-							break;
-						case 'frontend_account_error':
-							$('#msg_header').text('Huh hoh, too much traffic');
-							break;
-						case 'backend_account_error':
-							$('#msg_header').text('Timmo\'s done it again!');
-							break;
-						case 'mailinglist_subscribe_error':
-							$('#msg_header').text('A monkey escaped!');
-							break;
-					}
-
-					state_change('error');
-				}
-				else if (resp.view == 'incorrect_mail') {
-					$('#msg_icon').attr('class', 'lab icon');
-					$('#msg_text').text("There must be a typo in your e-mail, because this one doesn't look right!");
-					$('#msg_header').text('Mail hazard detected');
-
-					state_change('error');
-				}
-				else {
-					$('#msg_icon').attr('class', 'icon warning');
-					$('#msg_text').text("You couldn't be registered due to "+resp.data+"!");
-					$('#msg_header').text('Something went wrong');
-
-					state_change('error');
-				}
-			}
-		}
-	});
-
-	state = 'hey';
-	statelocked = true;
-}
-
 function email_deep_check(str) {
 	// validate and verify on server
 }
@@ -444,8 +369,9 @@ function input_magic(name) {
 		// codes ref : http://www.quirksmode.org/js/keys.html
 
 		if (keycode == 13) {
-			// enter pressed : submit value
-			email_subscribe();
+			// enter pressed : submit value (?)
+			log.console('enter pressed... submit?');
+
 			$email.data('hint', '');
 			enable_autocomplete = false;
 		}
