@@ -48,19 +48,8 @@ if (!String.prototype.localeCompare) {
 	Validation state
  */
 
-var COLOR_HEX_DEFAULT = '#2BA3D4';
-var COLOR_HEX_CHECK00 = '#a470d0';
-var COLOR_HEX_CHECK30 = '#7087d0';
-var COLOR_HEX_CHECK60 = '#70b4d0';
-var COLOR_HEX_CHECK90 = '#70d0b9';
-var COLOR_HEX_WARNING = '#d07070'; //'#BB2324';
-var COLOR_HEX_SUCCESS = '#a9d42b'; //'#88BB33';
-
-function color_switch(color) {
-	$('.message').css({
-		'color' : color,
-		'border-color' : color,
-	});
+function state_change(state) {
+	console.log('state_change = '+ state);
 }
 
 function input_state(name, state, completeness) {
@@ -197,7 +186,7 @@ function email_range_autocomplete($input) {
 	if (text.length < 2) {
 		// no completion yet...
 		$('#btsubmit').text('Complete the e-mail to continue!').attr('disabled', 'disabled');
-		color_switch(COLOR_HEX_DEFAULT);
+		state_change('incomplete');
 	}
 
 	// complete with "best guesses" (or "motivationnal" words)
@@ -216,7 +205,7 @@ function email_range_autocomplete($input) {
 			if (aft.indexOf('.') == -1) {
 				hint = complete(aft, DOMS, 1, true, '.');
 				$('#btsubmit').text('Where "at" you from?').attr('disabled', 'disabled');
-				color_switch(COLOR_HEX_CHECK30);
+				state_change('incomplete');
 			}
 			else {
 				var tmp = aft.split('.', 2);
@@ -226,11 +215,11 @@ function email_range_autocomplete($input) {
 				if (aft.charAt(aft.length - 1) !== '.') {
 					if (ext.length > 2) {
 						$('#btsubmit').text('Click here to receive your invite!!').removeAttr('disabled').transition('pulse');
-						color_switch(COLOR_HEX_CHECK90);
+						state_change('complete');
 					}
 					else {
 						hint = complete(ext, EXTS, 1, true);
-						color_switch(COLOR_HEX_CHECK60);
+						state_change('partial');
 					}
 				}
 				else {
@@ -336,7 +325,7 @@ function email_subscribe() {
 				$('#msg_text').text("You've been successfully registered... please confirm the email you will receive in your mailbox!");
 				$('#msg_header').text('Congratulations!');
 
-				color_switch(COLOR_HEX_SUCCESS);
+				state_change('success');
 
 				$('.ui.reveal.quartz').removeClass('move');
 				$('#btsubmit').removeAttr('disabled').attr('data-completed', true).text('Click here to visit the blog');
@@ -350,7 +339,7 @@ function email_subscribe() {
 					$('#msg_text').text("You\'ve already registered! Thank you for your support!");
 					$('#msg_header').text('Welcome back!');
 
-					color_switch(COLOR_HEX_SUCCESS);
+					state_change('complete');
 
 					$('.ui.reveal.quartz').removeClass('move');
 					$('#btsubmit').removeAttr('disabled').attr('data-completed', true).text('Click here to visit the blog');
@@ -374,21 +363,21 @@ function email_subscribe() {
 							break;
 					}
 
-					color_switch(COLOR_HEX_WARNING);
+					state_change('error');
 				}
 				else if (resp.view == 'incorrect_mail') {
 					$('#msg_icon').attr('class', 'lab icon');
 					$('#msg_text').text("There must be a typo in your e-mail, because this one doesn't look right!");
 					$('#msg_header').text('Mail hazard detected');
 
-					color_switch(COLOR_HEX_CHECK30);
+					state_change('error');
 				}
 				else {
 					$('#msg_icon').attr('class', 'icon warning');
 					$('#msg_text').text("You couldn't be registered due to "+resp.data+"!");
 					$('#msg_header').text('Something went wrong');
 
-					color_switch(COLOR_HEX_CHECK10);
+					state_change('error');
 				}
 			}
 		}
