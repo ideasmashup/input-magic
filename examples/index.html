@@ -1,0 +1,166 @@
+<!DOCTYPE html>
+<html>
+
+
+<head>
+<meta charset="UTF-8">
+<title>Input Magic v0.1.0</title>
+
+<!--
+  mandatory dependencies that you MUST include 
+  for Input Magic v0.1.0 to work !
+-->
+<script src="assets/jquery-2.1.1.min.js"></script>
+<script src="../src/input-magic.js"></script>
+
+
+<!-- 
+  demo imports for this example page that you 
+  can safely delete them from your own code !
+-->
+
+
+<link href='http://fonts.googleapis.com/css?family=Open+Sans:400italic,700italic,400,700' rel='stylesheet' type='text/css'>
+<link href="assets/index.css" rel="stylesheet" type="text/css">
+
+
+</head>
+
+
+<body>
+
+
+<div class="container">
+
+<h1>Example form</h1>
+
+<div class="form">
+  <div class="message">
+    <h3 class="header">Please fill the input below</h3>
+    <p>Input-magic v0.1.0 handles completion, masking and validating in this demo</p>
+  </div>
+
+  <div class="field">
+    <input name="email" id="email" type="text" class="text magic" value="" placeholder="Your email here..." data-im-mask="//{1,}@//{1,}./a/{2,6}" data-im-db="db_mail" />
+  </div>
+
+  <button id="btsubmit">Complete with your email</button>
+</div>
+
+</div>
+
+
+<script>
+var $email = $('input[name=email]');
+var firstpress = -1, lastpress = +new Date(), typespeed = -1, count = 0;
+var enable_autocomplete = false;
+
+//special post-keypress behaviors
+function after_keypress() {
+
+	// do nothing until user types more stuff
+	//if (lastpress == firstpress) return;
+
+	var pausedelay = +new Date() - lastpress;
+	//console.log('paused for '+ pausedelay);
+
+	if (pausedelay < 500) {
+		// last keypress very close : do nothing
+		// because user is probably still typing stuff...
+
+		// interrupt tasks
+		//$('.reveal.quartz .loader').hide();
+	}
+	else if (pausedelay > 1000) {
+		// last keypress was long ago
+		// check email harder with a server validation request
+
+		// indicate task in progress
+		//$('.reveal.quartz .loader').show();
+		color_switch(COLOR_HEX_CHECK60);
+
+		// animate avatar
+		state = 'hey';
+		loops = 0;
+	}
+	else {
+		// last keypress moderately close
+		// user not typing but may type again soon...
+	}
+
+	// do some basic autocompletion and checking
+	email_range_autocomplete($email);
+}
+
+$(document).ready(function(){
+
+	$('#btsubmit').attr('disabled', 'disabled');
+	setTimeout(function(){$email[0].focus();}, 1000);
+
+	$email.keypress(function(e){
+		var keycode = (e.keyCode ? e.keyCode : e.which);
+		var now = +new Date();
+
+		// typing text
+		if (count++ == 0) {
+			firstpress = now;
+			typespeed = 3000;
+		}
+		else {
+			lastpress = now;
+			typespeed = (typespeed + (now - lastpress)) / 2;
+		}
+
+		// codes ref : http://www.quirksmode.org/js/keys.html
+
+		if (keycode == 13) {
+			// enter pressed : submit value
+			email_subscribe();
+			$email.data('hint', '');
+			enable_autocomplete = false;
+		}
+		else if (keycode < 32) {
+			// non-printable character : clear hint
+			$email.data('hint', '');
+			enable_autocomplete = false;
+		}
+		else if (keycode >= 33 && keycode <= 40) {
+			// arrows keys (home, end, pgup, pgdwn, etc) : clear hint
+			$email.data('hint', '');
+			enable_autocomplete = true;
+		}
+		else {
+			// printable characters : typing text so stop checking
+			enable_autocomplete = true;
+			$('.reveal.quartz .loader').hide();
+		}
+	});
+
+	var autocomplete_loop = setInterval(function(){
+		if (enable_autocomplete) {
+			after_keypress();
+			enable_autocomplete = false;
+		}
+	}, 200);
+
+	$('#form_mail').on('submit', function(e) {
+		e.preventDefault();
+		email_subscribe();
+	});
+
+	$('#btsubmit').click(function(){
+		if (!$(this).attr('data-completed')) {
+			email_subscribe();
+		}
+		else {
+			location.href="http://www.codequartz.com/";
+		}
+	});
+
+});
+</script>
+
+</body>
+
+
+</html>
