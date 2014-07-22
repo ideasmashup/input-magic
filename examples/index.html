@@ -49,29 +49,10 @@
 
 
 <script>
-
-
 $(document).ready(function(){
-
-	$('#btsubmit').attr('disabled', 'disabled');
-	setTimeout(function(){$('#email')[0].focus();}, 1000);
 
 	// initialize autocomplete
 	input_magic('email');
-
-	$('#form_mail').on('submit', function(e) {
-		e.preventDefault();
-		email_subscribe();
-	});
-
-	$('#btsubmit').click(function(){
-		if (!$(this).attr('data-completed')) {
-			email_subscribe();
-		}
-		else {
-			location.href="http://www.codequartz.com/";
-		}
-	});
 
 });
 </script>

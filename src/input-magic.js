@@ -224,7 +224,6 @@ function email_range_autocomplete($input) {
 
 	if (text.length < 2) {
 		// no completion yet...
-		$('#btsubmit').text('Complete the e-mail to continue!').attr('disabled', 'disabled');
 		state_change('incomplete');
 	}
 
@@ -232,7 +231,6 @@ function email_range_autocomplete($input) {
 	if (text.indexOf('@') == -1) {
 		if (text.length > 0) {
 			hint = complete(text, ADJS, 1, true, '@');
-			$('#btsubmit').text('Who "at" you?').attr('disabled', 'disabled');
 		}
 	}
 	else {
@@ -243,7 +241,6 @@ function email_range_autocomplete($input) {
 
 			if (aft.indexOf('.') == -1) {
 				hint = complete(aft, DOMS, 1, true, '.');
-				$('#btsubmit').text('Where "at" you from?').attr('disabled', 'disabled');
 				state_change('incomplete');
 			}
 			else {
@@ -253,7 +250,6 @@ function email_range_autocomplete($input) {
 
 				if (aft.charAt(aft.length - 1) !== '.') {
 					if (ext.length > 2) {
-						$('#btsubmit').text('Click here to receive your invite!!').removeAttr('disabled').transition('pulse');
 						state_change('complete');
 					}
 					else {
@@ -367,7 +363,6 @@ function email_subscribe() {
 				state_change('success');
 
 				$('.ui.reveal.quartz').removeClass('move');
-				$('#btsubmit').removeAttr('disabled').attr('data-completed', true).text('Click here to visit the blog');
 			}
 			else {
 				$('#message.quartz').transition('shake');
@@ -381,7 +376,6 @@ function email_subscribe() {
 					state_change('complete');
 
 					$('.ui.reveal.quartz').removeClass('move');
-					$('#btsubmit').removeAttr('disabled').attr('data-completed', true).text('Click here to visit the blog');
 				}
 				else if (resp.view == 'registration_failed') {
 					$('#msg_icon').attr('class', 'icon coffee');
