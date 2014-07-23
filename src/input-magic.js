@@ -50,14 +50,12 @@
 			// because user is probably still typing stuff...
 
 			// interrupt tasks
-			//$('.reveal.quartz .loader').hide();
 		}
 		else if (pausedelay > 1000) {
 			// last keypress was long ago
 			// check email harder with a server validation request
 
 			// indicate task in progress
-			//$('.reveal.quartz .loader').show();
 
 			// animate avatar
 			state = 'hey';
@@ -376,7 +374,6 @@
 			else {
 				// printable characters : typing text so stop checking
 				enable_autocomplete = true;
-				$('.reveal.quartz .loader').hide();
 			}
 
 			if (enable_autocomplete) {
