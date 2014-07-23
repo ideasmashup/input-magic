@@ -336,6 +336,7 @@
 			}
 
 			// codes ref : http://www.quirksmode.org/js/keys.html
+			console.log("pressing "+ keycode);
 
 			if (keycode == 13) {
 				// enter pressed : submit value (?)
