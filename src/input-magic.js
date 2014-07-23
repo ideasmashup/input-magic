@@ -86,23 +86,6 @@
 		Form handling
 	*/
 
-	function ajax_forms(callback){
-		$('form').on('submit', function(e) {
-			e.preventDefault();
-
-			var $form = $(this);
-
-			$.ajax({
-				url: $form.attr('action'),
-				type: $form.attr('method'),
-				data: $form.serialize(),
-				success: function(resp) {
-					callback($form, resp);
-				}
-			});
-		});
-	}
-
 	function caret($input, value) {
 		var input = $input.get();
 		var pos = 0;
@@ -359,6 +342,10 @@
 				log.console('enter pressed... submit?');
 
 				$input.data('hint', '');
+				enable_autocomplete = false;
+			}
+			else if (keycode == 8 || keycode == 46) {
+				// backspace or suppr : show hint again
 				enable_autocomplete = false;
 			}
 			else if (keycode < 32) {
