@@ -340,7 +340,7 @@
 	function input_magic(name) {
 		$input = $('input[name='+name+']');
 
-		$input.keypress(function(e){
+		$input.keydown(function(e){
 			var keycode = (e.keyCode ? e.keyCode : e.which);
 			var now = +new Date();
 
