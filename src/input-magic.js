@@ -4,41 +4,37 @@
 
 	By William ANGER, ISC License, July 2014
 */
-/*
-	Native types extensions
-*/
-
-// @Bobince: http://stackoverflow.com/questions/3561493/is-there-a-regexp-escape-function-in-javascript/3561711#3561711
-function RegExp_escape(str) {
-	return (str !== undefined)? str.replace(/[-\/\\^$*+?.()|[\]{}]/g, '\\$&') : '';
-}
-
-if (!String.prototype.trim) {
-	String.prototype.trim = function (pattern) {
-		if (pattern == undefined) pattern = /^\s+|\s+$/g;
-		return this.replace(pattern, ''); //"\t\n\r\0\x0B."
-	};
-}
-
-if (!String.prototype.remove) {
-	String.prototype.remove = function(str) {
-		var re = (typeof str == 'string')? str : new RegExp(str, 'g');
-		return this.replace(re, '');
-	};
-}
-
-if (!String.prototype.localeCompare) {
-	String.prototype.localeCompare = function(str, locale, options) {
-		return ((this == str) ? 0 : ((this > str) ? 1 : -1));
-	};
-}
-
 
 (function(){
 
 	var $input = null;
 	var firstpress = -1, lastpress = +new Date(), typespeed = -1, count = 0;
 	var enable_autocomplete = false;
+	
+	// @Bobince: http://stackoverflow.com/questions/3561493/is-there-a-regexp-escape-function-in-javascript/3561711#3561711
+	function RegExp_escape(str) {
+		return (str !== undefined)? str.replace(/[-\/\\^$*+?.()|[\]{}]/g, '\\$&') : '';
+	}
+
+	if (!String.prototype.trim) {
+		String.prototype.trim = function (pattern) {
+			if (pattern == undefined) pattern = /^\s+|\s+$/g;
+			return this.replace(pattern, ''); //"\t\n\r\0\x0B."
+		};
+	}
+
+	if (!String.prototype.remove) {
+		String.prototype.remove = function(str) {
+			var re = (typeof str == 'string')? str : new RegExp(str, 'g');
+			return this.replace(re, '');
+		};
+	}
+
+	if (!String.prototype.localeCompare) {
+		String.prototype.localeCompare = function(str, locale, options) {
+			return ((this == str) ? 0 : ((this > str) ? 1 : -1));
+		};
+	}
 
 	//special post-keypress behaviors
 	function after_keypress() {
