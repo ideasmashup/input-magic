@@ -5,7 +5,7 @@
 	By William ANGER, ISC License, July 2014
 */
 
-(function(){
+(function($, window, document, undefined){
 
 	var $input = null;
 	var firstpress = -1, lastpress = +new Date(), typespeed = -1, count = 0;
@@ -373,4 +373,4 @@
 	}
 
 	window.input_magic = input_magic;
-})();
+})(jQuery, window, document);
