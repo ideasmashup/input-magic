@@ -9,9 +9,96 @@
 
 	var $input = null;
 	var firstpress = -1, lastpress = +new Date(), typespeed = -1, count = 0;
-	var enable_autocomplete = false;
-	
-	// @Bobince: http://stackoverflow.com/questions/3561493/is-there-a-regexp-escape-function-in-javascript/3561711#3561711
+
+	// Create the defaults once
+	var pluginName = 'inputMagic', defaults = {
+		propertyName : "value"
+	};
+
+	// The actual plugin constructor
+	function Plugin(element, options) {
+		this.element = element;
+		this.options = $.extend({}, defaults, options);
+
+		this._defaults = defaults;
+		this._name = pluginName;
+
+		this.init();
+	}
+
+	Plugin.prototype.init = function() {
+		// Place initialization logic here
+		// this.element
+		// this.options
+
+		var $elt = $(this.element);
+		var enable_autocomplete = false;
+
+		$elt.keydown(function(e){
+			var keycode = (e.keyCode ? e.keyCode : e.which);
+			var now = +new Date();
+
+			// typing text
+			if (count++ == 0) {
+				firstpress = now;
+				typespeed = 3000;
+			}
+			else {
+				lastpress = now;
+				typespeed = (typespeed + (now - lastpress)) / 2;
+			}
+
+			// codes ref : http://www.quirksmode.org/js/keys.html
+			console.log("pressing "+ keycode);
+
+			if (keycode == 13) {
+				// enter pressed : submit value (?)
+				log.console('enter pressed... submit?');
+
+				$elt.data('hint', '');
+				enable_autocomplete = false;
+			}
+			else if (keycode == 8 || keycode == 46) {
+				// backspace or suppr : show hint again
+				enable_autocomplete = false;
+			}
+			else if (keycode < 32) {
+				// non-printable character : clear hint
+				$elt.data('hint', '');
+				enable_autocomplete = false;
+			}
+			else if (keycode >= 33 && keycode <= 40) {
+				// arrows keys (home, end, pgup, pgdwn, etc) : clear hint
+				$elt.data('hint', '');
+				enable_autocomplete = true;
+			}
+			else {
+				// printable characters : typing text so stop checking
+				enable_autocomplete = true;
+			}
+
+			if (enable_autocomplete) {
+				// do autocomplete
+				setTimeout(function(){email_range_autocomplete($elt)}, 10);
+				enable_autocomplete = false;
+			}
+		});
+	};
+
+	// A really lightweight plugin wrapper around the constructor,
+	// preventing against multiple instantiations
+	$.fn[pluginName] = function(options) {
+		return this
+			.each(function() {
+				if (!$.data(this, 'plugin_' + pluginName)) {
+					$.data(this, 'plugin_' + pluginName, new Plugin(this,
+							options));
+				}
+			});
+	}
+
+	// @Bobince:
+	// http://stackoverflow.com/questions/3561493/is-there-a-regexp-escape-function-in-javascript/3561711#3561711
 	function RegExp_escape(str) {
 		return (str !== undefined)? str.replace(/[-\/\\^$*+?.()|[\]{}]/g, '\\$&') : '';
 	}
@@ -318,59 +405,4 @@
 		// validate and verify on server
 	}
 
-	function input_magic(name) {
-		$input = $('input[name='+name+']');
-
-		$input.keydown(function(e){
-			var keycode = (e.keyCode ? e.keyCode : e.which);
-			var now = +new Date();
-
-			// typing text
-			if (count++ == 0) {
-				firstpress = now;
-				typespeed = 3000;
-			}
-			else {
-				lastpress = now;
-				typespeed = (typespeed + (now - lastpress)) / 2;
-			}
-
-			// codes ref : http://www.quirksmode.org/js/keys.html
-			console.log("pressing "+ keycode);
-
-			if (keycode == 13) {
-				// enter pressed : submit value (?)
-				log.console('enter pressed... submit?');
-
-				$input.data('hint', '');
-				enable_autocomplete = false;
-			}
-			else if (keycode == 8 || keycode == 46) {
-				// backspace or suppr : show hint again
-				enable_autocomplete = false;
-			}
-			else if (keycode < 32) {
-				// non-printable character : clear hint
-				$input.data('hint', '');
-				enable_autocomplete = false;
-			}
-			else if (keycode >= 33 && keycode <= 40) {
-				// arrows keys (home, end, pgup, pgdwn, etc) : clear hint
-				$input.data('hint', '');
-				enable_autocomplete = true;
-			}
-			else {
-				// printable characters : typing text so stop checking
-				enable_autocomplete = true;
-			}
-
-			if (enable_autocomplete) {
-				// do autocomplete
-				setTimeout(function(){email_range_autocomplete($input)}, 10);
-				enable_autocomplete = false;
-			}
-		});
-	}
-
-	window.input_magic = input_magic;
 })(jQuery, window, document);
