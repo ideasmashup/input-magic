@@ -223,27 +223,6 @@
 		range_create($input, text.length, text.length + hint.length);
 	}
 
-	function range_autocomplete($input) {
-		// complete only when caret is at value end
-
-	}
-
-
-	/*
-		Email processing
-	*/
-
-	function cmp_str(a, b) {
-		return a.localCompare(b);
-	}
-
-	var ADJS = ['amazing','blithesome','charismatic','decisive','excellent',
-	            'fantastical','great','heroic','incredible','jolly','kickstarter',
-	            'light','magical','nice','outstanding','perfect','quality',
-	            'remarkable','smart','thrilling','ultimate','vibrant','wondrous','xylophone','yes_we_can','zippy'];
-	var DOMS = ['hotmail','live','yahoo','gmail','orange','aol','free','numericable'];
-	var EXTS = ['com','fr','eu','org','us','net','io'];
-
 	function complete(str, suggest_arr, max_results, offset, suffix) {
 		var results = [];
 		if (max_results === undefined) max_results = 1;
@@ -275,6 +254,10 @@
 		var len = text.length;
 		var hint = '';
 		var completeness = Math.min(text.length / 14, 1);
+
+		var ADJS = ['amazing','blithesome','charismatic','decisive','excellent','fantastical','great','heroic','incredible','jolly','kickstarter','light','magical','nice','outstanding','perfect','quality','remarkable','smart','thrilling','ultimate','vibrant','wondrous','xylophone','yes_we_can','zippy'];
+		var DOMS = ['hotmail','live','yahoo','gmail','orange','aol','free','numericable'];
+		var EXTS = ['com','fr','eu','org','us','net','io'];
 
 		console.log('input='+ text +' ( '+ (completeness*100) +'% )');
 
