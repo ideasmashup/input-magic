@@ -8,93 +8,75 @@
 (function($, window, document, undefined){
 
 	var $input = null;
-	var firstpress = -1, lastpress = +new Date(), typespeed = -1, count = 0;
+	var firstpress = -1, lastpress = +new Date(), count = 0;
 
-	// Create the defaults once
-	var pluginName = 'inputMagic', defaults = {
-		propertyName : "value"
-	};
-
-	// The actual plugin constructor
-	function Plugin(element, options) {
+	function inputMagic(element, options) {
+		this.options = $.extend({}, this.defaults, options);
 		this.element = element;
-		this.options = $.extend({}, defaults, options);
-
-		this._defaults = defaults;
-		this._name = pluginName;
-
 		this.init();
 	}
 
-	Plugin.prototype.init = function() {
-		// Place initialization logic here
-		// this.element
-		// this.options
+	inputMagic.prototype = {
+		defaults : {
+			// not yet defined...
+		},
 
-		var $elt = $(this.element);
-		var enable_autocomplete = false;
-
-		$elt.keydown(function(e){
-			var keycode = (e.keyCode ? e.keyCode : e.which);
-			var now = +new Date();
-
-			// typing text
-			if (count++ == 0) {
-				firstpress = now;
-				typespeed = 3000;
-			}
-			else {
+		init : function() {
+			var $elt = $(this.element);
+			var enable_autocomplete = false;
+	
+			$elt.keydown(function(e){
+				var keycode = (e.keyCode ? e.keyCode : e.which);
+				var now = +new Date();
+	
+				// typing text
+				if (count++ == 0) firstpress = now;
 				lastpress = now;
-				typespeed = (typespeed + (now - lastpress)) / 2;
-			}
-
-			// codes ref : http://www.quirksmode.org/js/keys.html
-			console.log("pressing "+ keycode);
-
-			if (keycode == 13) {
-				// enter pressed : submit value (?)
-				log.console('enter pressed... submit?');
-
-				$elt.data('hint', '');
-				enable_autocomplete = false;
-			}
-			else if (keycode == 8 || keycode == 46) {
-				// backspace or suppr : show hint again
-				enable_autocomplete = false;
-			}
-			else if (keycode < 32) {
-				// non-printable character : clear hint
-				$elt.data('hint', '');
-				enable_autocomplete = false;
-			}
-			else if (keycode >= 33 && keycode <= 40) {
-				// arrows keys (home, end, pgup, pgdwn, etc) : clear hint
-				$elt.data('hint', '');
-				enable_autocomplete = true;
-			}
-			else {
-				// printable characters : typing text so stop checking
-				enable_autocomplete = true;
-			}
-
-			if (enable_autocomplete) {
-				// do autocomplete
-				setTimeout(function(){email_range_autocomplete($elt)}, 10);
-				enable_autocomplete = false;
-			}
-		});
-	};
-
-	// A really lightweight plugin wrapper around the constructor,
-	// preventing against multiple instantiations
-	$.fn[pluginName] = function(options) {
-		return this
-			.each(function() {
-				if (!$.data(this, 'plugin_' + pluginName)) {
-					$.data(this, 'plugin_' + pluginName, new Plugin(this,
-							options));
+	
+				// codes ref : http://www.quirksmode.org/js/keys.html
+				console.log("pressing "+ keycode);
+	
+				if (keycode == 13) {
+					// enter pressed : submit value (?)
+					log.console('enter pressed... submit?');
+	
+					$elt.data('hint', '');
+					enable_autocomplete = false;
+				}
+				else if (keycode == 8 || keycode == 46) {
+					// backspace or suppr : show hint again
+					enable_autocomplete = false;
+				}
+				else if (keycode < 32) {
+					// non-printable character : clear hint
+					$elt.data('hint', '');
+					enable_autocomplete = false;
+				}
+				else if (keycode >= 33 && keycode <= 40) {
+					// arrows keys (home, end, pgup, pgdwn, etc) : clear hint
+					$elt.data('hint', '');
+					enable_autocomplete = true;
+				}
+				else {
+					// printable characters : typing text so stop checking
+					enable_autocomplete = true;
+				}
+	
+				if (enable_autocomplete) {
+					// do autocomplete
+					setTimeout(function(){email_range_autocomplete($elt)}, 10);
+					enable_autocomplete = false;
 				}
 			});
+		}
+	};
+
+	$.fn.inputMagic = function(options) {
+		return this.each(function() {
+			if (!$.data(this, 'inputMagic')) {
+				$.data(this, 'inputMagic', new inputMagic(this, options));
+			}
+		});
 	}
 
 	// @Bobince:
@@ -123,50 +105,12 @@
 		};
 	}
 
-	//special post-keypress behaviors
-	function after_keypress() {
-
-		// do nothing until user types more stuff
-		//if (lastpress == firstpress) return;
-
-		var pausedelay = +new Date() - lastpress;
-		//console.log('paused for '+ pausedelay);
-
-		if (pausedelay < 500) {
-			// last keypress very close : do nothing
-			// because user is probably still typing stuff...
-
-			// interrupt tasks
-		}
-		else if (pausedelay > 1000) {
-			// last keypress was long ago
-			// check email harder with a server validation request
-
-			// indicate task in progress
-
-			// animate avatar
-			state = 'hey';
-			loops = 0;
-		}
-		else {
-			// last keypress moderately close
-			// user not typing but may type again soon...
-		}
-
-		// do some basic autocompletion and checking
-		email_range_autocomplete($input);
-	}
 	/*
 		Validation state
 	 */
 
 	function state_change(state) {
 		console.log('state_change = '+ state);
-	}
-
-	function input_state(name, state, completeness) {
-		var $input = $('input{name='+name+']');
-		
 	}
 
 	/*
