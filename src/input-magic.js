@@ -101,32 +101,6 @@
 		Form handling
 	*/
 
-	function caret($input, value) {
-		var input = $input.get();
-		var pos = 0;
-
-		$input.focus();
-
-		if (value === undefined) {
-			// fetch caret position
-
-			if (input.createTextRange) {
-				var range = document.selection.createRange();
-				range.moveStart('character', -$input.val().length);
-				pos = range.text.length;
-			}
-			else if (input.selectionStart !== undefined) {
-				pos = input.selectionStart;
-			}
-
-			return pos;
-		}
-		else {
-			// set caret position
-			range_create($input, value, value);
-		}
-	}
-
 	function range_create($input, start, end) {
 		var input = $input[0];
 
