@@ -31,11 +31,11 @@
 		},
 
 		init : function() {
-			var enable_autocomplete = false;
 			var im = this;
 
 			this.$.keydown(function(e){
 				var keycode = (e.keyCode ? e.keyCode : e.which);
+				var show_hint = false;
 				var now = +new Date();
 
 				// typing text
@@ -50,31 +50,26 @@
 					log.console('enter pressed... submit?');
 
 					this.data('hint', '');
-					enable_autocomplete = false;
 				}
 				else if (keycode == 8 || keycode == 46) {
-					// backspace or suppr : show hint again
-					enable_autocomplete = false;
+					// backspace or suppr : show hint that got deleted (?)
 				}
 				else if (keycode < 32) {
 					// non-printable character : clear hint
 					this.data('hint', '');
-					enable_autocomplete = false;
 				}
 				else if (keycode >= 33 && keycode <= 40) {
 					// arrows keys (home, end, pgup, pgdwn, etc) : clear hint
 					this.data('hint', '');
-					enable_autocomplete = true;
+					show_hint = true;
 				}
 				else {
-					// printable characters : typing text so stop checking
-					enable_autocomplete = true;
+					// printable characters : show hint
+					show_hint = true;
 				}
 
-				if (enable_autocomplete) {
-					// do autocomplete
+				if (show_hint) {// display hint as requested
 					setTimeout(function(){im.email_hints(this)}, 10);
-					enable_autocomplete = false;
 				}
 			});
 		},
