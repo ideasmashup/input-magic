@@ -24,6 +24,7 @@
 		init : function() {
 			var $elt = $(this.element);
 			var enable_autocomplete = false;
+			var im = this;
 	
 			$elt.keydown(function(e){
 				var keycode = (e.keyCode ? e.keyCode : e.which);
@@ -64,7 +65,7 @@
 	
 				if (enable_autocomplete) {
 					// do autocomplete
-					setTimeout(function(){email_range_autocomplete($elt)}, 10);
+					setTimeout(function(){im.email_range_autocomplete($elt)}, 10);
 					enable_autocomplete = false;
 				}
 			});
@@ -95,7 +96,7 @@
 	
 			$input.val(text + hint);
 			$input.data('hint', hint);
-			range_create($input, text.length, text.length + hint.length);
+			this.range_create($input, text.length, text.length + hint.length);
 		},
 	
 		complete : function(str, suggest_arr, max_results, offset, suffix) {
@@ -144,7 +145,7 @@
 			// complete with "best guesses" (or "motivationnal" words)
 			if (text.indexOf('@') == -1) {
 				if (text.length > 0) {
-					hint = complete(text, ADJS, 1, true, '@');
+					hint = this.complete(text, ADJS, 1, true, '@');
 				}
 			}
 			else {
@@ -154,7 +155,7 @@
 					var aft = parts[1];
 	
 					if (aft.indexOf('.') == -1) {
-						hint = complete(aft, DOMS, 1, true, '.');
+						hint = this.complete(aft, DOMS, 1, true, '.');
 						state_change('incomplete');
 					}
 					else {
@@ -167,7 +168,7 @@
 								state_change('complete');
 							}
 							else {
-								hint = complete(ext, EXTS, 1, true);
+								hint = this.complete(ext, EXTS, 1, true);
 								state_change('partial');
 							}
 						}
@@ -185,7 +186,7 @@
 	
 			if (hint.length > 0) {
 				// only suggest non-empty strings
-				range_append_hint($input, hint);
+				this.range_append_hint($input, hint);
 			}
 			else {
 				$input.data('hint', '');
