@@ -68,6 +68,128 @@
 					enable_autocomplete = false;
 				}
 			});
+		},
+		
+		/*
+			Form handling
+		*/
+	
+		range_create : function($input, start, end) {
+			var input = $input[0];
+	
+			if (input.createTextRange) {
+				var range = input.createTextRange();
+				range.collapse(true);
+				range.moveStart('character', start);
+				range.moveEnd('character', end);
+				range.select();
+			}
+			else if (input.setSelectionRange) {
+				input.setSelectionRange(start, end);
+			}
+		},
+	
+		range_append_hint : function($input, hint) {
+			var input = $input.get();
+			var text = trim($input.val(), noregex(hint));
+	
+			$input.val(text + hint);
+			$input.data('hint', hint);
+			range_create($input, text.length, text.length + hint.length);
+		},
+	
+		complete : function(str, suggest_arr, max_results, offset, suffix) {
+			var results = [];
+			if (max_results === undefined) max_results = 1;
+			if (suffix === undefined) suffix = '';
+	
+			for (var i=0; i<suggest_arr.length; i++) {
+				if (results < max_results) {
+					if (suggest_arr[i].substring(0, str.length) == str) {
+						results.push(offset? suggest_arr[i].substr(str.length) + suffix : suggest_arr[i] + suffix);
+					}
+				}
+				else break;
+			}
+	
+			// return array or single value
+			if (results.length == 0) {
+				// no match found
+				return (max_results == 1) ? suffix : [suffix];
+			}
+			else {
+				// found a match (or more)
+				return (max_results == 1) ? results[0] : results;
+			}
+		},
+	
+		email_range_autocomplete : function($input) {
+			var value = $input.val();
+			var text = trim(value, noregex($input.data('hint')));
+			var len = text.length;
+			var hint = '';
+			var completeness = Math.min(text.length / 14, 1);
+	
+			var ADJS = ['amazing','blithesome','charismatic','decisive','excellent','fantastical','great','heroic','incredible','jolly','kickstarter','light','magical','nice','outstanding','perfect','quality','remarkable','smart','thrilling','ultimate','vibrant','wondrous','xylophone','yes_we_can','zippy'];
+			var DOMS = ['hotmail','live','yahoo','gmail','orange','aol','free','numericable'];
+			var EXTS = ['com','fr','eu','org','us','net','io'];
+	
+			console.log('input='+ text +' ( '+ (completeness*100) +'% )');
+	
+			if (text.length < 2) {
+				// no completion yet...
+				state_change('incomplete');
+			}
+	
+			// complete with "best guesses" (or "motivationnal" words)
+			if (text.indexOf('@') == -1) {
+				if (text.length > 0) {
+					hint = complete(text, ADJS, 1, true, '@');
+				}
+			}
+			else {
+				if (text.charAt(text.length - 1) != '@') {
+					var parts = text.split('@', 2);
+					var bef = parts[0];
+					var aft = parts[1];
+	
+					if (aft.indexOf('.') == -1) {
+						hint = complete(aft, DOMS, 1, true, '.');
+						state_change('incomplete');
+					}
+					else {
+						var tmp = aft.split('.', 2);
+						var host = tmp[0];
+						var ext = tmp[1];
+	
+						if (aft.charAt(aft.length - 1) !== '.') {
+							if (ext.length > 2) {
+								state_change('complete');
+							}
+							else {
+								hint = complete(ext, EXTS, 1, true);
+								state_change('partial');
+							}
+						}
+						else {
+							// no hint
+						}
+	
+						// no hint
+					}
+				}
+				else {
+					// no hint
+				}
+			}
+	
+			if (hint.length > 0) {
+				// only suggest non-empty strings
+				range_append_hint($input, hint);
+			}
+			else {
+				$input.data('hint', '');
+			}
 		}
 	};
 
@@ -95,128 +217,6 @@
 
 	function state_change(state) {
 		console.log('state_change = '+ state);
-	}
-
-	/*
-		Form handling
-	*/
-
-	function range_create($input, start, end) {
-		var input = $input[0];
-
-		if (input.createTextRange) {
-			var range = input.createTextRange();
-			range.collapse(true);
-			range.moveStart('character', start);
-			range.moveEnd('character', end);
-			range.select();
-		}
-		else if (input.setSelectionRange) {
-			input.setSelectionRange(start, end);
-		}
-	}
-
-	function range_append_hint($input, hint) {
-		var input = $input.get();
-		var text = trim($input.val(), noregex(hint));
-
-		$input.val(text + hint);
-		$input.data('hint', hint);
-		range_create($input, text.length, text.length + hint.length);
-	}
-
-	function complete(str, suggest_arr, max_results, offset, suffix) {
-		var results = [];
-		if (max_results === undefined) max_results = 1;
-		if (suffix === undefined) suffix = '';
-
-		for (var i=0; i<suggest_arr.length; i++) {
-			if (results < max_results) {
-				if (suggest_arr[i].substring(0, str.length) == str) {
-					results.push(offset? suggest_arr[i].substr(str.length) + suffix : suggest_arr[i] + suffix);
-				}
-			}
-			else break;
-		}
-
-		// return array or single value
-		if (results.length == 0) {
-			// no match found
-			return (max_results == 1) ? suffix : [suffix];
-		}
-		else {
-			// found a match (or more)
-			return (max_results == 1) ? results[0] : results;
-		}
-	}
-
-	function email_range_autocomplete($input) {
-		var value = $input.val();
-		var text = trim(value, noregex($input.data('hint')));
-		var len = text.length;
-		var hint = '';
-		var completeness = Math.min(text.length / 14, 1);
-
-		var ADJS = ['amazing','blithesome','charismatic','decisive','excellent','fantastical','great','heroic','incredible','jolly','kickstarter','light','magical','nice','outstanding','perfect','quality','remarkable','smart','thrilling','ultimate','vibrant','wondrous','xylophone','yes_we_can','zippy'];
-		var DOMS = ['hotmail','live','yahoo','gmail','orange','aol','free','numericable'];
-		var EXTS = ['com','fr','eu','org','us','net','io'];
-
-		console.log('input='+ text +' ( '+ (completeness*100) +'% )');
-
-		if (text.length < 2) {
-			// no completion yet...
-			state_change('incomplete');
-		}
-
-		// complete with "best guesses" (or "motivationnal" words)
-		if (text.indexOf('@') == -1) {
-			if (text.length > 0) {
-				hint = complete(text, ADJS, 1, true, '@');
-			}
-		}
-		else {
-			if (text.charAt(text.length - 1) != '@') {
-				var parts = text.split('@', 2);
-				var bef = parts[0];
-				var aft = parts[1];
-
-				if (aft.indexOf('.') == -1) {
-					hint = complete(aft, DOMS, 1, true, '.');
-					state_change('incomplete');
-				}
-				else {
-					var tmp = aft.split('.', 2);
-					var host = tmp[0];
-					var ext = tmp[1];
-
-					if (aft.charAt(aft.length - 1) !== '.') {
-						if (ext.length > 2) {
-							state_change('complete');
-						}
-						else {
-							hint = complete(ext, EXTS, 1, true);
-							state_change('partial');
-						}
-					}
-					else {
-						// no hint
-					}
-
-					// no hint
-				}
-			}
-			else {
-				// no hint
-			}
-		}
-
-		if (hint.length > 0) {
-			// only suggest non-empty strings
-			range_append_hint($input, hint);
-		}
-		else {
-			$input.data('hint', '');
-		}
 	}
 
 })(jQuery, window, document);
