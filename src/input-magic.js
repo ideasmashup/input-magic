@@ -7,8 +7,6 @@
 
 (function($, window, document, undefined){
 
-	var firstpress = -1, lastpress = +new Date(), count = 0;
-
 	// @bobince, stackoverflow.com/questions/3561493/is-there-a-regexp-escape-function-in-javascript/3561711
 	function noregex(str) {
 		return str ? str.replace(/[-\\^$*+?.()|[\]{}]/g, '\\$&') : '';
@@ -32,7 +30,7 @@
 		},
 
 		init : function() {
-			var im = this;
+			var it = this;
 
 			// instantiate appropriate completion module
 			var type = this.$.data('type'),
@@ -47,8 +45,8 @@
 				var now = +new Date();
 
 				// typing text
-				if (count++ == 0) firstpress = now;
-				lastpress = now;
+				if (!it.firstpress) it.firstpress = now;
+				it.lastpress = now;
 
 				// codes ref : http://www.quirksmode.org/js/keys.html
 				console.log("pressing "+ keycode);
@@ -77,7 +75,7 @@
 				}
 
 				if (show_hint) {// display hint as requested
-					setTimeout(function(){im.autocomplete()}, 10);
+					setTimeout(function(){it.autocomplete()}, 10);
 				}
 			});
 		},
