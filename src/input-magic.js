@@ -7,7 +7,6 @@
 
 (function($, window, document, undefined){
 
-	var $input = null;
 	var firstpress = -1, lastpress = +new Date(), count = 0;
 
 	// @bobince, stackoverflow.com/questions/3561493/is-there-a-regexp-escape-function-in-javascript/3561711
@@ -22,6 +21,7 @@
 	function inputMagic(element, options) {
 		this.options = $.extend({}, this.defaults, options);
 		this.element = element;
+		this.$ = $(element);
 		this.init();
 	}
 
@@ -31,11 +31,10 @@
 		},
 
 		init : function() {
-			var $elt = $(this.element);
 			var enable_autocomplete = false;
 			var im = this;
 
-			$elt.keydown(function(e){
+			this.$.keydown(function(e){
 				var keycode = (e.keyCode ? e.keyCode : e.which);
 				var now = +new Date();
 
@@ -50,7 +49,7 @@
 					// enter pressed : submit value (?)
 					log.console('enter pressed... submit?');
 
-					$elt.data('hint', '');
+					this.data('hint', '');
 					enable_autocomplete = false;
 				}
 				else if (keycode == 8 || keycode == 46) {
@@ -59,12 +58,12 @@
 				}
 				else if (keycode < 32) {
 					// non-printable character : clear hint
-					$elt.data('hint', '');
+					this.data('hint', '');
 					enable_autocomplete = false;
 				}
 				else if (keycode >= 33 && keycode <= 40) {
 					// arrows keys (home, end, pgup, pgdwn, etc) : clear hint
-					$elt.data('hint', '');
+					this.data('hint', '');
 					enable_autocomplete = true;
 				}
 				else {
@@ -74,34 +73,31 @@
 
 				if (enable_autocomplete) {
 					// do autocomplete
-					setTimeout(function(){im.email_hints($elt)}, 10);
+					setTimeout(function(){im.email_hints(this)}, 10);
 					enable_autocomplete = false;
 				}
 			});
 		},
 
-		range : function($input, start, end) {
-			var input = $input[0];
-
-			if (input.createTextRange) {
-				var range = input.createTextRange();
+		range : function(start, end) {
+			if (this.element.createTextRange) {
+				var range = this.element.createTextRange();
 				range.collapse(true);
 				range.moveStart('character', start);
 				range.moveEnd('character', end);
 				range.select();
 			}
-			else if (input.setSelectionRange) {
-				input.setSelectionRange(start, end);
+			else if (this.element.setSelectionRange) {
+				this.element.setSelectionRange(start, end);
 			}
 		},
 
-		append_hint : function($input, hint) {
-			var input = $input.get();
-			var text = trim($input.val(), noregex(hint));
+		append_hint : function(hint) {
+			var text = trim(this.element.value, noregex(hint));
 
-			$input.val(text + hint);
-			$input.data('hint', hint);
-			this.range($input, text.length, text.length + hint.length);
+			this.$.val(text + hint);
+			this.$.data('hint', hint);
+			this.range(text.length, text.length + hint.length);
 		},
 
 		seek_hint : function(str, suggest_arr, max_results, offset, suffix) {
@@ -129,9 +125,9 @@
 			}
 		},
 
-		email_hints : function($input) {
-			var value = $input.val();
-			var text = trim(value, noregex($input.data('hint')));
+		email_hints : function() {
+			var value = this.$.val();
+			var text = trim(value, noregex(this.$.data('hint')));
 			var len = text.length;
 			var hint = '';
 			var completeness = Math.min(text.length / 14, 1);
@@ -191,10 +187,10 @@
 
 			if (hint.length > 0) {
 				// only suggest non-empty strings
-				this.append_hint($input, hint);
+				this.append_hint(hint);
 			}
 			else {
-				$input.data('hint', '');
+				this.$.data('hint', '');
 			}
 		},
 
