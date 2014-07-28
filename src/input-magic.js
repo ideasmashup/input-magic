@@ -69,7 +69,7 @@
 				}
 
 				if (show_hint) {// display hint as requested
-					setTimeout(function(){im.email_hints(this)}, 10);
+					setTimeout(function(){im.autocomplete()}, 10);
 				}
 			});
 		},
@@ -120,12 +120,27 @@
 			}
 		},
 
-		proc_hint : function() {
+		autocomplete : function() {
 			var value = this.$.val(),
 				text = trim(value, noregex(this.$.data('hint'))),
-				len = text.length,
+				length = text.length,
 				hint = '',
-				hinter = this.$.data('type-obj');
+				module = this.$.data('type-obj');
+
+			if (module) {
+				hint = module.apply(this, value, text, length);
+
+				if (hint.length > 0) {
+					// only suggest non-empty strings
+					this.append_hint(hint);
+				}
+				else {
+					this.$.data('hint', '');
+				}
+			}
+			else {
+				this.trigger('error', 'cannot find module for type '+ this.$.data('input-type'));
+			}
 		},
 
 		email_hints : function() {
@@ -199,6 +214,12 @@
 
 		trigger : function(eventtype, data) {
 			$(this.element).trigger('input'+ eventtype, data);
+		},
+		
+		modules : {
+			'email' : function() {
+				
+			},
 		}
 	};
 
