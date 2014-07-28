@@ -81,15 +81,12 @@
 
 	// @Bobince:
 	// http://stackoverflow.com/questions/3561493/is-there-a-regexp-escape-function-in-javascript/3561711#3561711
-	function RegExp_escape(str) {
-		return (str !== undefined)? str.replace(/[-\/\\^$*+?.()|[\]{}]/g, '\\$&') : '';
+	function noregex(str) {
+		return str ? str.replace(/[-\/\\^$*+?.()|[\]{}]/g, '\\$&') : '';
 	}
 
-	if (!String.prototype.trim) {
-		String.prototype.trim = function (pattern) {
-			if (pattern == undefined) pattern = /^\s+|\s+$/g;
-			return this.replace(pattern, ''); //"\t\n\r\0\x0B."
-		};
+	function trim(str, pattern) {
+		return str.replace(pattern || /^\s+|\s+$/g, ''); //"\t\n\r\0\x0B."
 	}
 
 	/*
@@ -147,7 +144,7 @@
 
 	function range_append_hint($input, hint) {
 		var input = $input.get();
-		var text = $input.val().trim(RegExp_escape(hint));
+		var text = trim($input.val(), noregex(hint));
 
 		$input.val(text + hint);
 		$input.data('hint', hint);
@@ -181,7 +178,7 @@
 
 	function email_range_autocomplete($input) {
 		var value = $input.val();
-		var text = value.trim(RegExp_escape($input.data('hint')));
+		var text = trim(value, noregex($input.data('hint')));
 		var len = text.length;
 		var hint = '';
 		var completeness = Math.min(text.length / 14, 1);
@@ -281,7 +278,7 @@
 		}
 
 		// Test for leading and trailing periods and whitespace
-		if (domain.trim() !== domain) {
+		if (trim(domain) !== domain) {
 			console.log('domain_period_limits');
 			return false;
 		}
@@ -298,7 +295,7 @@
 		// Loop through each sub
 		for (sub in subs) {
 			// Test for leading and trailing hyphens and whitespace
-			if (sub.trim() !== sub) {
+			if (trim(sub) !== sub) {
 				console.log('sub_hyphen_limits');
 				return false;
 			}
