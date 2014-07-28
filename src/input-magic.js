@@ -22,6 +22,7 @@
 		this.options = $.extend({}, this.defaults, options);
 		this.element = element;
 		this.$ = $(element);
+		this.completor;
 		this.init();
 	}
 
@@ -32,6 +33,13 @@
 
 		init : function() {
 			var im = this;
+
+			// instantiate appropriate completion module
+			var type = this.$.data('type'),
+				module = this.modules[type] || null;
+
+			if (module) this.completor = module;
+			else this.trigger('error', 'cannot find module for type '+ type);
 
 			this.$.keydown(function(e){
 				var keycode = (e.keyCode ? e.keyCode : e.which);
@@ -124,11 +132,10 @@
 			var value = this.$.val(),
 				text = trim(value, noregex(this.$.data('hint'))),
 				length = text.length,
-				hint = '',
-				module = this.$.data('type-obj');
+				hint = '';
 
-			if (module) {
-				hint = module.apply(this, value, text, length);
+			if (this.completor) {
+				hint = this.completor.call(this, value, text, length);
 
 				if (hint.length > 0) {
 					// only suggest non-empty strings
@@ -138,78 +145,6 @@
 					this.$.data('hint', '');
 				}
 			}
-			else {
-				this.trigger('error', 'cannot find module for type '+ this.$.data('input-type'));
-			}
-		},
-
-		email_hints : function() {
-			var value = this.$.val();
-			var text = trim(value, noregex(this.$.data('hint')));
-			var len = text.length;
-			var hint = '';
-			var completeness = Math.min(text.length / 14, 1);
-
-			var ADJS = ['amazing','blithesome','charismatic','decisive','excellent','fantastical','great','heroic','incredible','jolly','kickstarter','light','magical','nice','outstanding','perfect','quality','remarkable','smart','thrilling','ultimate','vibrant','wondrous','xylophone','yes_we_can','zippy'];
-			var DOMS = ['hotmail','live','yahoo','gmail','orange','aol','free','numericable'];
-			var EXTS = ['com','fr','eu','org','us','net','io'];
-
-			console.log('input='+ text +' ( '+ (completeness*100) +'% )');
-
-			if (text.length < 2) {
-				// no completion yet...
-				this.trigger('state','incomplete');
-			}
-
-			// complete with "best guesses" (or "motivationnal" words)
-			if (text.indexOf('@') == -1) {
-				if (text.length > 0) {
-					hint = this.seek_hint(text, ADJS, 1, true, '@');
-				}
-			}
-			else {
-				if (text.charAt(text.length - 1) != '@') {
-					var parts = text.split('@', 2);
-					var bef = parts[0];
-					var aft = parts[1];
-
-					if (aft.indexOf('.') == -1) {
-						hint = this.seek_hint(aft, DOMS, 1, true, '.');
-						this.trigger('state', 'incomplete');
-					}
-					else {
-						var tmp = aft.split('.', 2);
-						var host = tmp[0];
-						var ext = tmp[1];
-
-						if (aft.charAt(aft.length - 1) !== '.') {
-							if (ext.length > 2) {
-								this.trigger('state', 'complete');
-							}
-							else {
-								hint = this.seek_hint(ext, EXTS, 1, true);
-								this.trigger('state', 'partial');
-							}
-						}
-						else {
-							// no hint
-						}
-
-						// no hint
-					}
-				}
-				else {
-					// no hint
-				}
-			}
-
-			if (hint.length > 0) {
-				// only suggest non-empty strings
-				this.append_hint(hint);
-			}
-			else {
-				this.$.data('hint', '');
-			}
 		},
 
 		trigger : function(eventtype, data) {
@@ -217,9 +152,61 @@
 		},
 		
 		modules : {
-			'email' : function() {
-				
-			},
+			'email' : function(value, text, length) {
+				var ADJS = ['amazing','blithesome','charismatic','decisive','excellent','fantastical','great','heroic','incredible','jolly','kickstarter','light','magical','nice','outstanding','perfect','quality','remarkable','smart','thrilling','ultimate','vibrant','wondrous','xylophone','yes_we_can','zippy'];
+				var DOMS = ['hotmail','live','yahoo','gmail','orange','aol','free','numericable'];
+				var EXTS = ['com','fr','eu','org','us','net','io'];
+
+				if (text.length < 2) {
+					// no completion yet...
+					this.trigger('state','incomplete');
+				}
+
+				// complete with "best guesses" (or "motivationnal" words)
+				if (text.indexOf('@') == -1) {
+					if (text.length > 0) {
+						return this.seek_hint(text, ADJS, 1, true, '@');
+					}
+				}
+				else {
+					if (text.charAt(text.length - 1) != '@') {
+						var parts = text.split('@', 2);
+						var bef = parts[0];
+						var aft = parts[1];
+
+						if (aft.indexOf('.') == -1) {
+							this.trigger('state', 'incomplete');
+							return this.seek_hint(aft, DOMS, 1, true, '.');
+						}
+						else {
+							var tmp = aft.split('.', 2);
+							var host = tmp[0];
+							var ext = tmp[1];
+
+							if (aft.charAt(aft.length - 1) !== '.') {
+								if (ext.length > 2) {
+									this.trigger('state', 'complete');
+								}
+								else {
+									this.trigger('state', 'partial');
+									return this.seek_hint(ext, EXTS, 1, true);
+								}
+							}
+							else {
+								// no hint
+							}
+
+							// no hint
+						}
+					}
+					else {
+						// no hint
+					}
+				}
+
+				// no hint
+				return '';
+			}
 		}
 	};
 
