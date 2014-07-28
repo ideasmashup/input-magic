@@ -92,19 +92,6 @@
 		};
 	}
 
-	if (!String.prototype.remove) {
-		String.prototype.remove = function(str) {
-			var re = (typeof str == 'string')? str : new RegExp(str, 'g');
-			return this.replace(re, '');
-		};
-	}
-
-	if (!String.prototype.localeCompare) {
-		String.prototype.localeCompare = function(str, locale, options) {
-			return ((this == str) ? 0 : ((this > str) ? 1 : -1));
-		};
-	}
-
 	/*
 		Validation state
 	 */
