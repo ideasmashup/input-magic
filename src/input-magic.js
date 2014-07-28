@@ -120,6 +120,14 @@
 			}
 		},
 
+		proc_hint : function() {
+			var value = this.$.val(),
+				text = trim(value, noregex(this.$.data('hint'))),
+				len = text.length,
+				hint = '',
+				hinter = this.$.data('type-obj');
+		},
+
 		email_hints : function() {
 			var value = this.$.val();
 			var text = trim(value, noregex(this.$.data('hint')));
