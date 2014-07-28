@@ -139,7 +139,7 @@
 	
 			if (text.length < 2) {
 				// no completion yet...
-				state_change('incomplete');
+				this.trigger('state','incomplete');
 			}
 	
 			// complete with "best guesses" (or "motivationnal" words)
@@ -156,7 +156,7 @@
 	
 					if (aft.indexOf('.') == -1) {
 						hint = this.complete(aft, DOMS, 1, true, '.');
-						state_change('incomplete');
+						this.trigger('state', 'incomplete');
 					}
 					else {
 						var tmp = aft.split('.', 2);
@@ -165,11 +165,11 @@
 	
 						if (aft.charAt(aft.length - 1) !== '.') {
 							if (ext.length > 2) {
-								state_change('complete');
+								this.trigger('state', 'complete');
 							}
 							else {
 								hint = this.complete(ext, EXTS, 1, true);
-								state_change('partial');
+								this.trigger('state', 'partial');
 							}
 						}
 						else {
@@ -191,6 +191,10 @@
 			else {
 				$input.data('hint', '');
 			}
+		},
+
+		trigger : function(eventtype, data) {
+			$.trigger('input'+ eventtype, data);
 		}
 	};
 
@@ -210,14 +214,6 @@
 
 	function trim(str, pattern) {
 		return str.replace(pattern || /^\s+|\s+$/g, ''); //"\t\n\r\0\x0B."
-	}
-
-	/*
-		Validation state
-	 */
-
-	function state_change(state) {
-		console.log('state_change = '+ state);
 	}
 
 })(jQuery, window, document);
