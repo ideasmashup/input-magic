@@ -151,6 +151,25 @@
 		
 		modules : {
 			'email' : function(value, text, length) {
+
+				var rules = {
+					minlength: 2,
+					maxlength: 255,
+					subrules: [
+						{
+							pattern: /^[a-zA-Z0-9!#$%&\'*+\/=?^_`{|}~\.-]+$/i, 
+							minlength: 0,
+							maxlength: 255
+						},
+						'@',
+						{
+							pattern : /^[a-z0-9-]+$/i,
+							minlength: 1,
+							maxlength: 3
+						}
+					]
+				};
+
 				var ADJS = ['amazing','blithesome','charismatic','decisive','excellent','fantastical','great','heroic','incredible','jolly','kickstarter','light','magical','nice','outstanding','perfect','quality','remarkable','smart','thrilling','ultimate','vibrant','wondrous','xylophone','yes_we_can','zippy'];
 				var DOMS = ['hotmail','live','yahoo','gmail','orange','aol','free','numericable'];
 				var EXTS = ['com','fr','eu','org','us','net','io'];
