@@ -151,28 +151,41 @@
 		
 		modules : {
 			'email' : function(value, text, length) {
+				var ADJS = ['amazing','blithesome','charismatic','decisive','excellent','fantastical','great','heroic','incredible','jolly','kickstarter','light','magical','nice','outstanding','perfect','quality','remarkable','smart','thrilling','ultimate','vibrant','wondrous','xylophone','yes_we_can','zippy'];
+				var DOMS = ['hotmail','live','yahoo','gmail','orange','aol','free','numericable'];
+				var EXTS = ['com','fr','eu','org','us','net','io'];
 
 				var rules = {
+					name: 'the email',
 					minlength: 2,
 					maxlength: 255,
 					subrules: [
 						{
-							pattern: /^[a-zA-Z0-9!#$%&\'*+\/=?^_`{|}~\.-]+$/i, 
+							name: 'account name',
+							pattern: /^[a-zA-Z0-9!#$%&\'*+\/=?^_`{|}~\.-]+$/i,
+							hints : ADJS,
 							minlength: 0,
 							maxlength: 255
 						},
 						'@',
 						{
+							name: 'server name',
 							pattern : /^[a-z0-9-]+$/i,
+							hints : DOMS,
+							minlength: 1,
+							maxlength: 3
+						},
+						'.',
+						{
+							name: 'extension',
+							example: '.com, .net, .org, .fr, etc',
+							pattern : /^[a-z0-9-]+$/i,
+							hints : EXTS,
 							minlength: 1,
 							maxlength: 3
 						}
 					]
 				};
-
-				var ADJS = ['amazing','blithesome','charismatic','decisive','excellent','fantastical','great','heroic','incredible','jolly','kickstarter','light','magical','nice','outstanding','perfect','quality','remarkable','smart','thrilling','ultimate','vibrant','wondrous','xylophone','yes_we_can','zippy'];
-				var DOMS = ['hotmail','live','yahoo','gmail','orange','aol','free','numericable'];
-				var EXTS = ['com','fr','eu','org','us','net','io'];
 
 				if (text.length < 2) {
 					// no completion yet...
