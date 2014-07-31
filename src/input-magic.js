@@ -16,6 +16,12 @@
 		return str.replace(pattern || /^\s+|\s+$/g, '');
 	}
 	
+	function format(template, map) {
+		return template.replace(/{([a-z_][a-z0-9_]*)}/gi, function(tag, name) {
+			return map[name] ? map[name] : '';
+		});
+	}
+	
 	function inputMagicModule(options) {
 		this.rules = null;
 		this.init(options);
@@ -32,9 +38,11 @@
 
 			if (text.length < lmin) {
 				// too short
+				this.trigger('error', format('{rulename} value is too short. Must be longer than {length} character(s)', {rulename: rule.name, lenght: lmin}));
 			}
 			else if (text.length > lmax) {
 				// too long
+				this.trigger('error', format('{rulename} value is too long. Cannot exceed {length} character(s)', {rulename: rule.name, lenght: lmax}));
 			}
 
 			// complete with "best guesses" (or "motivationnal" words)
