@@ -15,6 +15,79 @@
 	function trim(str, pattern) {
 		return str.replace(pattern || /^\s+|\s+$/g, '');
 	}
+	
+	function inputMagicModule(options) {
+		this.rules = null;
+		this.init(options);
+	}
+	
+	inputMagicModule.prototype = {
+		init: function() {
+			// module constructor
+		},
+		
+		apply_rule : function(rule, value, text, length) {
+			var lmin = (rule.minlength !== undefined)? rule.minlength : 0;
+			var lmax = (rule.maxlength !== undefined)? rule.maxlength : 65535;
+
+			if (text.length < lmin) {
+				// too short
+			}
+			else if (text.length > lmax) {
+				// too long
+			}
+
+			// complete with "best guesses" (or "motivationnal" words)
+			if (text.indexOf('@') == -1) {
+				if (text.length > 0) {
+					return this.seek_hint(text, ADJS, 1, true, '@');
+				}
+			}
+			else {
+				if (text.charAt(text.length - 1) != '@') {
+					var parts = text.split('@', 2);
+					var bef = parts[0];
+					var aft = parts[1];
+
+					if (aft.indexOf('.') == -1) {
+						this.trigger('state', 'incomplete');
+						return this.seek_hint(aft, DOMS, 1, true, '.');
+					}
+					else {
+						var tmp = aft.split('.', 2);
+						var host = tmp[0];
+						var ext = tmp[1];
+
+						if (aft.charAt(aft.length - 1) !== '.') {
+							if (ext.length > 2) {
+								this.trigger('state', 'complete');
+							}
+							else {
+								this.trigger('state', 'partial');
+								return this.seek_hint(ext, EXTS, 1, true);
+							}
+						}
+						else {
+							// no hint
+						}
+
+						// no hint
+					}
+				}
+				else {
+					// no hint
+				}
+			}
+
+			// no hint
+			return '';
+		},
+
+		autocomplete: function(value, text, length) {
+			this.apply_rules();
+			//if (!.test(local)) {
+		} 
+	};
 
 	function inputMagic(element, options) {
 		this.options = $.extend({}, this.defaults, options);
@@ -148,7 +221,7 @@
 		trigger : function(eventtype, data) {
 			$(this.element).trigger('input'+ eventtype, data);
 		},
-		
+
 		modules : {
 			'email' : function(value, text, length) {
 				var ADJS = ['amazing','blithesome','charismatic','decisive','excellent','fantastical','great','heroic','incredible','jolly','kickstarter','light','magical','nice','outstanding','perfect','quality','remarkable','smart','thrilling','ultimate','vibrant','wondrous','xylophone','yes_we_can','zippy'];
