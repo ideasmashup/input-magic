@@ -44,6 +44,29 @@
 				// too long
 				this.trigger('error', format('{rulename} value is too long. Cannot exceed {length} character(s)', {rulename: rule.name, lenght: lmax}));
 			}
+			
+			if (rule.pattern !== undefined) {
+				// validate against RegExp pattern
+				
+				if (rule.pattern.test(local)) {
+					// correct value
+					this.trigger('validation', {success: true, msg: format('{rulename} is correct!', {rulename: rule.name})})
+				}
+				else {
+					// incorrect
+					this.trigger('error', format('{rulename} is incorrect!'))
+				}
+			}
+			
+			if (rule.hints !== undefined) {
+				// do autocompletion using the hints array elements
+				var next_separator = '';
+
+				if (text.length > 0) {
+					// we seek hints only after >= 1 char has been typed
+					return this.seek_hint(text, rule.hints, 1, true, next_separator);
+				}
+			}
 
 			// complete with "best guesses" (or "motivationnal" words)
 			if (text.indexOf('@') == -1) {
