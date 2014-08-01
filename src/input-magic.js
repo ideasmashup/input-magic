@@ -23,7 +23,7 @@
 	}
 	
 	function inputMagicModule(options) {
-		this.rules = null;
+		this.rules = [];
 		this.init(options);
 	}
 	
@@ -42,9 +42,56 @@
 			};
 
 			this.options = $.extend({}, defaults, options);
-			this.rules = this.rules_compile(this.options.rules); 
+
+			// optimize module rules for faster parsing
+			this.rules = this.rules_optimize(this.options.rules)[0];
 		},
 
+		rules_optimize : function(rules) {
+			var optimized = [], rule;
+
+			if (is('Array', rules)) {
+				// rule in a collection of other rules and string "separators"
+
+				if (rules.length > 0) {
+					for (var i = 0; i<rules.length; i++) {
+						rule = rules[i];
+
+						if (is('String', rule)) {
+							// don't store strings, they are copied into rules' 
+							// .before and .after
+						}
+						else if (is('Object', rule)) {
+							// inject sibling separators inside the rule object
+
+							if (rules.length > i + 1 && is('String', rules[i + 1])) {
+								// string separator after
+								rule.after = rules[i + 1];
+							}
+
+							if (0 >= i - 1 && is('String', rules[i - 1])) {
+								// string separator after
+								rule.before = rules[i - 1];
+							}
+
+							if (rule.rules !== undefined) {
+								// optimize sub-rules recursively
+								rule.rules = this.rules_optimize(rule.rules);
+							}
+
+							// push optimized rule to final rules array
+							optimized.push(rule);
+						}
+					}
+				}
+			}
+			else if (is('Object', rules)) {
+				// not part of an array, push immediately
+				optimized.push(rules);
+			}
+
+			return optimized;
+		},
 
 		apply_rule : function(rule, value, text, length) {
 			var lmin = (rule.minlength !== undefined)? rule.minlength : 0;
