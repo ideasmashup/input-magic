@@ -233,11 +233,10 @@
 		autocomplete : function() {
 			var value = this.$.val(),
 				text = trim(value, noregex(this.$.data('hint'))),
-				length = text.length,
 				hint = '';
 
 			if (this.completor) {
-				hint = this.completor.call(this, value, text, length);
+				hint = this.completor.call(this, value, text);
 
 				if (hint.length > 0) {
 					// only suggest non-empty strings
@@ -254,7 +253,7 @@
 		},
 
 		modules : {
-			'email' : function(value, text, length) {
+			'email' : function(value, text) {
 				var ADJS = ['amazing','blithesome','charismatic','decisive','excellent','fantastical','great','heroic','incredible','jolly','kickstarter','light','magical','nice','outstanding','perfect','quality','remarkable','smart','thrilling','ultimate','vibrant','wondrous','xylophone','yes_we_can','zippy'];
 				var DOMS = ['hotmail','live','yahoo','gmail','orange','aol','free','numericable'];
 				var EXTS = ['com','fr','eu','org','us','net','io'];
