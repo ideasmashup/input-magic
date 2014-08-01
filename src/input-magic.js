@@ -28,10 +28,19 @@
 	}
 	
 	inputMagicModule.prototype = {
-		init: function() {
+		init: function(options) {
 			// module constructor
+			var defaults = {
+				do_validate: true,
+				do_autocomplete: true,
+				language: 'en',
+			};
+
+			this.options = $.extend({}, defaults, options);
+			this.rules = this.rules_compile(this.options.rules); 
 		},
-		
+
+
 		apply_rule : function(rule, value, text, length) {
 			var lmin = (rule.minlength !== undefined)? rule.minlength : 0;
 			var lmax = (rule.maxlength !== undefined)? rule.maxlength : 65535;
