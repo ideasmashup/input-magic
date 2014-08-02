@@ -22,7 +22,7 @@
 		});
 	}
 	
-	function inputMagicModule(options) {
+	function inputMagicEmailModule(options) {
 		this.rules = [];
 		this.init(options);
 	}
@@ -32,7 +32,7 @@
 		return obj !== undefined && obj !== null && clas === type;
 	}
 	
-	inputMagicModule.prototype = {
+	inputMagicEmailModule.prototype = {
 		init: function(options) {
 			// module constructor
 			var defaults = {
@@ -176,9 +176,97 @@
 		},
 
 		autocomplete: function(value, text, length) {
-			this.apply_rules();
+			var res = this.apply_rules();
 			//if (!.test(local)) {
-		} 
+		},
+		
+		run : function(value, text) {
+			var ADJS = ['amazing','blithesome','charismatic','decisive','excellent','fantastical','great','heroic','incredible','jolly','kickstarter','light','magical','nice','outstanding','perfect','quality','remarkable','smart','thrilling','ultimate','vibrant','wondrous','xylophone','yes_we_can','zippy'];
+			var DOMS = ['hotmail','live','yahoo','gmail','orange','aol','free','numericable'];
+			var EXTS = ['com','fr','eu','org','us','net','io'];
+
+			var rule = {
+				name: 'the email',
+				minlength: 2,
+				maxlength: 255,
+				rules: [
+					{
+						name: 'account name',
+						pattern: /^[a-zA-Z0-9!#$%&\'*+\/=?^_`{|}~\.-]+$/i,
+						hints : ADJS,
+						minlength: 0,
+						maxlength: 255
+					},
+					'@',
+					{
+						name: 'server name',
+						pattern : /^[a-z0-9-]+$/i,
+						hints : DOMS,
+						minlength: 1,
+						maxlength: 3
+					},
+					'.',
+					{
+						name: 'extension',
+						example: '.com, .net, .org, .fr, etc',
+						pattern : /^[a-z0-9-]+$/i,
+						hints : EXTS,
+						minlength: 1,
+						maxlength: 3
+					}
+				]
+			};
+
+			if (text.length < 2) {
+				// no completion yet...
+				this.trigger('state','incomplete');
+			}
+
+			// complete with "best guesses" (or "motivationnal" words)
+			if (text.indexOf('@') == -1) {
+				if (text.length > 0) {
+					return this.seek_hint(text, ADJS, 1, true, '@');
+				}
+			}
+			else {
+				if (text.charAt(text.length - 1) != '@') {
+					var parts = text.split('@', 2);
+					var bef = parts[0];
+					var aft = parts[1];
+
+					if (aft.indexOf('.') == -1) {
+						this.trigger('state', 'incomplete');
+						return this.seek_hint(aft, DOMS, 1, true, '.');
+					}
+					else {
+						var tmp = aft.split('.', 2);
+						var host = tmp[0];
+						var ext = tmp[1];
+
+						if (aft.charAt(aft.length - 1) !== '.') {
+							if (ext.length > 2) {
+								this.trigger('state', 'complete');
+							}
+							else {
+								this.trigger('state', 'partial');
+								return this.seek_hint(ext, EXTS, 1, true);
+							}
+						}
+						else {
+							// no hint
+						}
+
+						// no hint
+					}
+				}
+				else {
+					// no hint
+				}
+			}
+
+			// no hint
+			return '';
+		}
 	};
 
 	function inputMagic(element, options) {
@@ -297,7 +385,7 @@
 				hint = '';
 
 			if (this.completor) {
-				hint = this.completor.call(this, value, text);
+				hint = this.completor.run.call(this, value, text);
 
 				if (hint.length > 0) {
 					// only suggest non-empty strings
@@ -314,93 +402,7 @@
 		},
 
 		modules : {
-			'email' : function(value, text) {
-				var ADJS = ['amazing','blithesome','charismatic','decisive','excellent','fantastical','great','heroic','incredible','jolly','kickstarter','light','magical','nice','outstanding','perfect','quality','remarkable','smart','thrilling','ultimate','vibrant','wondrous','xylophone','yes_we_can','zippy'];
-				var DOMS = ['hotmail','live','yahoo','gmail','orange','aol','free','numericable'];
-				var EXTS = ['com','fr','eu','org','us','net','io'];
-
-				var rules = {
-					name: 'the email',
-					minlength: 2,
-					maxlength: 255,
-					subrules: [
-						{
-							name: 'account name',
-							pattern: /^[a-zA-Z0-9!#$%&\'*+\/=?^_`{|}~\.-]+$/i,
-							hints : ADJS,
-							minlength: 0,
-							maxlength: 255
-						},
-						'@',
-						{
-							name: 'server name',
-							pattern : /^[a-z0-9-]+$/i,
-							hints : DOMS,
-							minlength: 1,
-							maxlength: 3
-						},
-						'.',
-						{
-							name: 'extension',
-							example: '.com, .net, .org, .fr, etc',
-							pattern : /^[a-z0-9-]+$/i,
-							hints : EXTS,
-							minlength: 1,
-							maxlength: 3
-						}
-					]
-				};
-
-				if (text.length < 2) {
-					// no completion yet...
-					this.trigger('state','incomplete');
-				}
-
-				// complete with "best guesses" (or "motivationnal" words)
-				if (text.indexOf('@') == -1) {
-					if (text.length > 0) {
-						return this.seek_hint(text, ADJS, 1, true, '@');
-					}
-				}
-				else {
-					if (text.charAt(text.length - 1) != '@') {
-						var parts = text.split('@', 2);
-						var bef = parts[0];
-						var aft = parts[1];
-
-						if (aft.indexOf('.') == -1) {
-							this.trigger('state', 'incomplete');
-							return this.seek_hint(aft, DOMS, 1, true, '.');
-						}
-						else {
-							var tmp = aft.split('.', 2);
-							var host = tmp[0];
-							var ext = tmp[1];
-
-							if (aft.charAt(aft.length - 1) !== '.') {
-								if (ext.length > 2) {
-									this.trigger('state', 'complete');
-								}
-								else {
-									this.trigger('state', 'partial');
-									return this.seek_hint(ext, EXTS, 1, true);
-								}
-							}
-							else {
-								// no hint
-							}
-
-							// no hint
-						}
-					}
-					else {
-						// no hint
-					}
-				}
-
-				// no hint
-				return '';
-			}
+			'email' : new inputMagicEmailModule()
 		}
 	};
 
