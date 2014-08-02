@@ -38,7 +38,9 @@
 			var defaults = {
 				do_validate: true,
 				do_autocomplete: true,
-				language: 'en',
+				list_accounts : ['amazing','blithesome','charismatic','decisive','excellent','fantastical','great','heroic','incredible','jolly','kickstarter','light','magical','nice','outstanding','perfect','quality','remarkable','smart','thrilling','ultimate','vibrant','wondrous','xylophone','yes_we_can','zippy'],
+				list_hosts : ['hotmail','live','yahoo','gmail','orange','aol','free','numericable'],
+				list_tlds : ['com','fr','eu','org','us','net','io'],
 			};
 
 			this.options = $.extend({}, defaults, options);
@@ -179,12 +181,8 @@
 			var res = this.apply_rules();
 			//if (!.test(local)) {
 		},
-		
-		run : function(value, text) {
-			var ADJS = ['amazing','blithesome','charismatic','decisive','excellent','fantastical','great','heroic','incredible','jolly','kickstarter','light','magical','nice','outstanding','perfect','quality','remarkable','smart','thrilling','ultimate','vibrant','wondrous','xylophone','yes_we_can','zippy'];
-			var DOMS = ['hotmail','live','yahoo','gmail','orange','aol','free','numericable'];
-			var EXTS = ['com','fr','eu','org','us','net','io'];
 
+		run : function(module, value, text) {
 			var rule = {
 				name: 'the email',
 				minlength: 2,
@@ -193,7 +191,7 @@
 					{
 						name: 'account name',
 						pattern: /^[a-zA-Z0-9!#$%&\'*+\/=?^_`{|}~\.-]+$/i,
-						hints : ADJS,
+						hints : module.options.list_accounts,
 						minlength: 0,
 						maxlength: 255
 					},
@@ -201,7 +199,7 @@
 					{
 						name: 'server name',
 						pattern : /^[a-z0-9-]+$/i,
-						hints : DOMS,
+						hints : module.options.list_hosts,
 						minlength: 1,
 						maxlength: 3
 					},
@@ -210,7 +208,7 @@
 						name: 'extension',
 						example: '.com, .net, .org, .fr, etc',
 						pattern : /^[a-z0-9-]+$/i,
-						hints : EXTS,
+						hints : module.options.list_tlds,
 						minlength: 1,
 						maxlength: 3
 					}
@@ -225,7 +223,7 @@
 			// complete with "best guesses" (or "motivationnal" words)
 			if (text.indexOf('@') == -1) {
 				if (text.length > 0) {
-					return this.seek_hint(text, ADJS, 1, true, '@');
+					return this.seek_hint(text, rule.rules[0].hints, 1, true, '@');
 				}
 			}
 			else {
@@ -236,7 +234,7 @@
 
 					if (aft.indexOf('.') == -1) {
 						this.trigger('state', 'incomplete');
-						return this.seek_hint(aft, DOMS, 1, true, '.');
+						return this.seek_hint(aft, rule.rules[2].hints, 1, true, '.');
 					}
 					else {
 						var tmp = aft.split('.', 2);
@@ -249,7 +247,7 @@
 							}
 							else {
 								this.trigger('state', 'partial');
-								return this.seek_hint(ext, EXTS, 1, true);
+								return this.seek_hint(ext, rule.rules[4].hints, 1, true);
 							}
 						}
 						else {
@@ -385,7 +383,7 @@
 				hint = '';
 
 			if (this.completor) {
-				hint = this.completor.run.call(this, value, text);
+				hint = this.completor.run.call(this, this.completor, value, text);
 
 				if (hint.length > 0) {
 					// only suggest non-empty strings
